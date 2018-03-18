@@ -3,6 +3,7 @@ const webpack = require('webpack');
 
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+const svgStore = require('webpack-svgstore-plugin');
 
 const isProd = process.env.NODE_ENV === 'production';
 const isAnalyze = process.env.ANALYZE || false;
@@ -68,6 +69,16 @@ const config = {
             },
             alwaysWriteToDisk: true,
         }),
+        new svgStore({
+            svgoOptions: {
+                plugins: [
+                    {
+                        removeTitle: true
+                    }
+                ]
+            },
+            prefix: ''
+        })
     ],
     stats: {
         hash: false,

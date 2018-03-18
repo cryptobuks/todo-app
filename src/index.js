@@ -1,8 +1,28 @@
 import React from 'react';
 import { render } from 'react-dom';
-import { injectGlobal } from 'styled-components';
+import { createStore } from 'redux';
+import { Provider, connect } from 'react-redux';
 
+import { injectGlobal } from 'styled-components';
+import svg4everybody from 'svg4everybody';
+
+import reducers from './reducers';
 import App from './App';
+
+if (process.env.NODE_ENV !== 'production') {
+    var __svg__ = {
+        path: './svg/*.svg',
+        name: 'svgsprite.svg'
+    };
+} else {
+    var __svg__ = {
+        path: './svg/*.svg',
+        name: 'svgsprite.[hash].svg'
+    };
+}
+
+require('webpack-svgstore-plugin/src/helpers/svgxhr')(__svg__);
+svg4everybody();
 
 injectGlobal([
     `
@@ -30,4 +50,15 @@ injectGlobal([
     `,
 ]);
 
-render(<App />, document.querySelector('main'));
+const store = createStore(reducers);
+
+store.subscribe(() => {
+    console.log(store.getState());
+});
+
+render(
+    <Provider store={store}>
+        <App />
+    </Provider>,
+    document.querySelector('main')
+);

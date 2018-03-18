@@ -67,11 +67,9 @@ const StyledCheckbox = styled.span`
     }
 `;
 
-const Checkbox = styled.span``;
-
 export default class Item extends Component {
     state = {
-        checked: this.props.checked,
+        completed: this.props.completed,
     };
     handleChange = e => {
         const { checked } = e.target;
@@ -89,7 +87,7 @@ export default class Item extends Component {
         return (
             <Inner {...this.state}>
                 <Text>{children}</Text>
-                <Input checked={this.state.checked} data-id={id} onChange={this.handleChange} />
+                <Input checked={this.state.completed} data-id={id} onChange={this.handleChange} />
                 <StyledCheckbox />
             </Inner>
         );
