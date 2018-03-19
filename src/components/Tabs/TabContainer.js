@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 const TabContent = styled.div`
     background-color: #f5f7f9;
-    padding-top: 24px;
+    padding: 24px 56px 0;
 `;
 
 export default ({children}) => {

@@ -18,18 +18,6 @@ const Label = styled.div`
     font-size: 24px;
     font-weight: 500;
     color: #213a5a;
-
-    ${props =>
-        props.selected &&
-        `&::after {
-        content: '';
-        position: absolute;
-        bottom: -3px;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background-color: #297aff;
-    }`};
 `;
 
 const StyledIcon = styled(Icon)`

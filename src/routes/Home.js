@@ -4,15 +4,18 @@ import { connect } from 'react-redux';
 import styled from 'styled-components';
 import SwipeableViews from 'react-swipeable-views';
 
-import { fetchActivities } from '../actions/activities';
+import { removeActivity } from '../actions/activities';
 
 import Box from '../components/Box';
 import Button from '../components/Button';
+import Chart from '../components/Chart';
 import Header from '../components/Header';
 import Icon from '../components/Icon';
 import ListItem from '../components/ListItem';
 import TabContainer from '../components/Tabs/TabContainer';
 import Tabs, { Tab } from '../components/Tabs';
+
+import { changeBalance } from '../actions/balance';
 
 const SelectIcon = styled(Icon)`
     width: 25px;
@@ -67,12 +70,13 @@ const Balance = styled.div`
     color: #213a5a;
 `;
 
-const Potracheno = styled.div`
+const Difference = styled.div`
     display: inline-block;
-    background-color: #feecf1;
+    background-color: ${props =>
+        props.type === 'income' ? 'rgba(67, 230, 169, .3)' : 'rgba(252, 67, 119, .3)'};
     border-radius: 10px;
     padding: 0 25px;
-    color: #fc4377;
+    color: ${props => (props.type === 'income' ? '#43e6a9' : '#fc4377')};
     font-weight: 500;
     margin-top: 15px;
     font-size: 24px;
@@ -103,7 +107,19 @@ const BoxCol = styled.div`
     box-sizing: border-box;
 `;
 
-const List = styled.div``;
+const List = styled.div`
+    position: relative;
+    height: 100%;
+`;
+
+const EmptyList = styled.div`
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 22px;
+    color: #213a5a;
+    font-weight: 500;
+`;
 
 class Home extends Component {
     state = {
@@ -119,72 +135,84 @@ class Home extends Component {
             value,
         });
     };
+    onClick = id => {
+        this.props.dispatch(removeActivity(id));
+    };
+    handleSubmitBalance = event => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+
+            this.props.dispatch(changeBalance(event.target.innerText));
+        }
+    };
     render() {
-        const { activities } = this.props;
+        const { activities, currentBalance, difference, expenses, revenues } = this.props;
 
         return (
             <div>
                 <Header>
                     <Button href="/add" iconName="plus" />
                     <Select>
-                        <SelectIcon iconName="calendar" />2017
+                        <SelectIcon iconName="calendar" />
+                        2017
                         <SelectArrow iconName="chevron-down" />
                     </Select>
                 </Header>
                 <BalanceWrapper>
-                    <Title>Total banlace</Title>
-                    <Balance>$32,058.98</Balance>
-                    <Potracheno>-$2890,35</Potracheno>
+                    <Title>Total balance</Title>
+                    <Balance>
+                        $
+                        <span contentEditable="true" onKeyPress={this.handleSubmitBalance}>
+                            {currentBalance}
+                        </span>
+                    </Balance>
+                    {difference && (
+                        <Difference type={difference.type}>
+                            {difference.type === 'income' ? '+' : '-'} ${difference.value}
+                        </Difference>
+                    )}
                 </BalanceWrapper>
                 <BoxWrapper>
                     <BoxInner>
                         <BoxRow>
                             <BoxCol>
-                                <Box />
+                                <Box label="Revenues" value={revenues} />
                             </BoxCol>
                             <BoxCol>
-                                <Box bg="#6c6fff" />
+                                <Box label="Expenses" value={expenses} bg="#6c6fff" />
                             </BoxCol>
                             <BoxCol>
-                                <Box bg="#7a82ac" />
+                                <Box label="Savings" bg="#7a82ac" />
                             </BoxCol>
                         </BoxRow>
                     </BoxInner>
                 </BoxWrapper>
                 <Tabs value={this.state.value} onChange={this.handleChange}>
-                    <Tab active="true" iconName="bell" label="Activities" />
+                    <Tab iconName="bell" label="Activities" />
                     <Tab iconName="bar-chart-2" label="Statistics" />
                     <Tab iconName="list" label="Summary" />
                 </Tabs>
                 <SwipeableViews axis="x" index={this.state.value} onChangeIndex={this.handleChangeIndex}>
                     <TabContainer>
                         <List>
-                            {activities &&
+                            {activities.length ? (
                                 activities.map(item => (
                                     <ListItem
+                                        key={item.id}
                                         type={item.typeValue}
                                         title={item.title}
                                         created={item.created}
-                                        total={item.value}
+                                        total={item.total}
+                                        onClick={() => this.onClick(item.id)}
                                     />
-                                ))}
+                                ))
+                            ) : (
+                                <EmptyList>Empty :(</EmptyList>
+                            )}
                         </List>
                     </TabContainer>
                     <TabContainer>
-                        <List>
-                            <ListItem
-                                type="spend"
-                                title="iTunes Gift Card #22338"
-                                created="Today, 13:45"
-                                amount="$198.25"
-                            />
-                            <ListItem
-                                type="income"
-                                title="iTunes Gift Card #22338"
-                                created="Today, 13:45"
-                                amount="$198.25"
-                            />
-                        </List>
+                        <Chart activities={activities} />
                     </TabContainer>
                     <TabContainer />
                 </SwipeableViews>
@@ -193,9 +221,63 @@ class Home extends Component {
     }
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = ({ balance, activities }) => {
+    const finalBalance = () => {
+        const income = activities.filter(item => item.typeValue === 'income');
+        const expense = activities.filter(item => item.typeValue === 'expense');
+        const getTotal = action => {
+            try {
+                if (action.length > 1) {
+                    return action.reduce((res, item) => res.total + item.total);
+                } else {
+                    return action[0].total;
+                }
+            } catch (err) {
+                return 0;
+            }
+        };
+
+        const totalExpense = getTotal(expense);
+        const totalIncome = getTotal(income);
+
+        const getCurrentBalance = () => {
+            let value = balance;
+
+            if (totalExpense) {
+                value -= totalExpense;
+            }
+            if (totalIncome) {
+                value += totalIncome;
+            }
+
+            return value;
+        };
+        const currentBalance = getCurrentBalance();
+
+        const getDifference = () => {
+            if (currentBalance === balance) return {};
+            if (currentBalance > balance) return { value: currentBalance - balance, type: 'income' };
+
+            return { value: balance - currentBalance, type: 'expense' };
+        };
+
+        const difference = getDifference();
+        return {
+            currentBalance,
+            difference,
+            expenses: totalExpense,
+            revenues: totalIncome,
+        };
+    };
+
+    const { currentBalance, difference, expenses, revenues } = finalBalance();
+
     return {
-        activities: state.activities,
+        revenues,
+        expenses,
+        currentBalance,
+        difference,
+        activities,
     };
 };
 

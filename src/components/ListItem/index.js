@@ -49,13 +49,20 @@ const Total = styled.div`
     color: #213a5a;
 
     & > span {
+        margin-right: 10px;
         color: ${({ type }) => (type === 'income' ? '#39d498' : '#f9346b')};
     }
 `;
 
-export default ({ type = 'income', title, created, total }) => {
+export default ({ type = 'income', title, created, total, onClick }) => {
+    let date = new Date(created).toLocaleDateString('en', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    });
+
     return (
-        <Inner>
+        <Inner onClick={onClick}>
             <Left>
                 {type === 'income' ? (
                     <StyledIcon iconName="arrow-up-right" type={type} />
@@ -64,12 +71,12 @@ export default ({ type = 'income', title, created, total }) => {
                 )}
                 <Text>
                     <Title>{title}</Title>
-                    <Created>{created}</Created>
+                    <Created>{date}</Created>
                 </Text>
             </Left>
             <Total type={type}>
                 <span>{type === 'income' ? '+' : '-'}</span>
-                {total}
+                ${total}
             </Total>
         </Inner>
     );

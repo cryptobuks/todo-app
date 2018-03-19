@@ -24,8 +24,11 @@ const configStore = () => {
         throttle(() => {
             saveState({
                 activities: store.getState().activities,
+                balance: store.getState().balance,
             });
-            console.log(store.getState());
+            if (process.env.NODE_ENV !== 'production') {
+                console.log(store.getState());
+            }
         }, 1000)
     );
 

@@ -9,16 +9,14 @@ const Header = styled.header`
     margin-bottom: 20px;
     display: flex;
     align-items: center;
-    height: 160px;
+    height: 100px;
     justify-content: space-between;
     padding: 0 60px;
 `;
 
 
-export default ({children}) => {
+export default (props) => {
     return (
-        <Header>
-            {children}
-        </Header>
+        <Header {...props} />
     );
 };

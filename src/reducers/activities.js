@@ -12,7 +12,7 @@ export default (state = [], { type, id, title, total, typeValue, created }) => {
                 },
             ];
         case 'REMOVE_ACTIVITY':
-            return state.map(todo => (todo.id === action.id ? {} : todo));
+            return state.filter(item => (item.id !== id));
         default:
             return state;
     }

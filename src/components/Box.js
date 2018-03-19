@@ -19,9 +19,10 @@ const Header = styled.div``;
 const Title = styled.div`
     font-size: 20px;
     text-transform: uppercase;
+    opacity: 0.7;
 `;
 
-const Amount = styled.div`
+const Value = styled.div`
     font-size: 30px;
     font-weight: 500;
     letter-spacing: 1px;
@@ -43,11 +44,11 @@ const Footer = styled.div`
     font-weight: 500;
 `;
 
-export default ({bg}) => {
+export default ({label, value, bg}) => {
     return (<Inner bg={bg}>
         <Header>
-            <Title>Revenues</Title>
-            <Amount>$819</Amount>
+            <Title>{label}</Title>
+            <Value>${value}</Value>
         </Header>
         <Footer><StyledIcon iconName="arrow-up-right" />0.60%</Footer>
     </Inner>);
