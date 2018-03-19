@@ -39,7 +39,7 @@ const Created = styled.div`
     color: #b5bec8;
 `;
 
-const Amount = styled.div`
+const Total = styled.div`
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -53,7 +53,7 @@ const Amount = styled.div`
     }
 `;
 
-export default ({ type = 'income', title, created, amount }) => {
+export default ({ type = 'income', title, created, total }) => {
     return (
         <Inner>
             <Left>
@@ -67,10 +67,10 @@ export default ({ type = 'income', title, created, amount }) => {
                     <Created>{created}</Created>
                 </Text>
             </Left>
-            <Amount type={type}>
+            <Total type={type}>
                 <span>{type === 'income' ? '+' : '-'}</span>
-                {amount}
-            </Amount>
+                {total}
+            </Total>
         </Inner>
     );
 };

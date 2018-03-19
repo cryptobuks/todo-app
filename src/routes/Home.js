@@ -1,26 +1,48 @@
 import React, { Component } from 'react';
+import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import SwipeableViews from 'react-swipeable-views';
 
-import { addTodo } from '../actions/todos';
-import Todo from '../components/Todo';
-import AddTodo from '../components/AddTodo';
+import { fetchActivities } from '../actions/activities';
 
-import Header from '../components/Header';
 import Box from '../components/Box';
-import Tabs, { Tab } from '../components/Tabs';
-import TabContainer from '../components/Tabs/TabContainer';
+import Button from '../components/Button';
+import Header from '../components/Header';
+import Icon from '../components/Icon';
 import ListItem from '../components/ListItem';
+import TabContainer from '../components/Tabs/TabContainer';
+import Tabs, { Tab } from '../components/Tabs';
 
-const Body = styled.div`
-    background-color: #fff;
-    color: #232840;
+const SelectIcon = styled(Icon)`
+    width: 25px;
+    height: 25px;
+    color: #a8b2bc;
+    margin-right: 10px;
+`;
+
+const Select = styled.div`
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+    border: 2px solid #a8b2bc;
+    font-size: 22px;
+    font-weight: 500;
     color: #213a5a;
-    min-height: 100vh;
-    margin: 0 auto;
-    padding: 0 15px;
+    padding: 15px 60px 15px 25px;
     box-sizing: border-box;
+`;
+
+const SelectArrow = styled(Icon)`
+    position: absolute;
+    top: 50%;
+    right: 20px;
+    height: 25px;
+    width: 25px;
+    transform: translateY(-50%);
+    color: #a8b2bc;
 `;
 
 const BalanceWrapper = styled.div`
@@ -98,8 +120,17 @@ class Home extends Component {
         });
     };
     render() {
+        const { activities } = this.props;
+
         return (
             <div>
+                <Header>
+                    <Button href="/add" iconName="plus" />
+                    <Select>
+                        <SelectIcon iconName="calendar" />2017
+                        <SelectArrow iconName="chevron-down" />
+                    </Select>
+                </Header>
                 <BalanceWrapper>
                     <Title>Total banlace</Title>
                     <Balance>$32,058.98</Balance>
@@ -128,6 +159,19 @@ class Home extends Component {
                 <SwipeableViews axis="x" index={this.state.value} onChangeIndex={this.handleChangeIndex}>
                     <TabContainer>
                         <List>
+                            {activities &&
+                                activities.map(item => (
+                                    <ListItem
+                                        type={item.typeValue}
+                                        title={item.title}
+                                        created={item.created}
+                                        total={item.value}
+                                    />
+                                ))}
+                        </List>
+                    </TabContainer>
+                    <TabContainer>
+                        <List>
                             <ListItem
                                 type="spend"
                                 title="iTunes Gift Card #22338"
@@ -142,25 +186,17 @@ class Home extends Component {
                             />
                         </List>
                     </TabContainer>
-                    <TabContainer><List>
-                            <ListItem
-                                type="spend"
-                                title="iTunes Gift Card #22338"
-                                created="Today, 13:45"
-                                amount="$198.25"
-                            />
-                            <ListItem
-                                type="income"
-                                title="iTunes Gift Card #22338"
-                                created="Today, 13:45"
-                                amount="$198.25"
-                            />
-                        </List></TabContainer>
-                    <TabContainer></TabContainer>
+                    <TabContainer />
                 </SwipeableViews>
             </div>
         );
     }
 }
 
-export default Home;
+const mapStateToProps = state => {
+    return {
+        activities: state.activities,
+    };
+};
+
+export default connect(mapStateToProps)(Home);
